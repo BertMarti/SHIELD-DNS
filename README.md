@@ -77,11 +77,29 @@ Si tienes HEIMDALL instalado, la VPN ya configura automáticamente SHIELD-DNS co
 ## Actualizar
 
 ```bash
-cd /ruta/a/SHIELD-DNS
-git pull
-docker compose pull
-docker compose up -d
+cd ~/homelab/SHIELD-DNS   # o donde lo clonaras
+./update.sh
 ```
+
+`update.sh` hace primero una copia de seguridad, descarga los cambios del repositorio y las imágenes nuevas, y vuelve a aplicar la instalación. Tus listas y ajustes se conservan.
+
+## Copia de seguridad y restauración
+
+```bash
+./backup.sh
+```
+
+Crea `backups/shield-dns-AAAAMMDD-HHMM.tar.gz` con tu `.env` y una exportación de Pi-hole (listas, dominios permitidos/bloqueados, clientes y ajustes). Se conservan las 7 más recientes. **Copia ese archivo fuera de la Raspberry** (a tu PC o a un USB): si formateas, es lo único que necesitas.
+
+Para restaurar (por ejemplo, en una Raspberry recién formateada):
+
+```bash
+git clone https://github.com/BertMarti/SHIELD-DNS.git && cd SHIELD-DNS
+mkdir -p backups && cp /ruta/a/shield-dns-AAAAMMDD-HHMM.tar.gz backups/
+./restore.sh backups/shield-dns-AAAAMMDD-HHMM.tar.gz
+```
+
+`restore.sh` pide confirmación, recupera la configuración y arranca todo con `install.sh`.
 
 ## Desinstalar
 

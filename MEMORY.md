@@ -235,3 +235,8 @@ Estas no son compromisos, solo ideas.
 - [Unbound Documentation](https://www.nlnetlabs.nl/projects/unbound/about/)
 - [DNSSEC Explained](https://www.icann.org/dnssec/)
 - [WireGuard (HEIMDALL)](https://www.wireguard.com/)
+
+## Copias de seguridad y actualización (2026-10-07)
+
+- `backup.sh`, `restore.sh` y `update.sh` añadidos y probados en la Pi: copia → cambio → restauración devuelve el estado guardado.
+- `update.sh` siempre hace copia antes de actualizar.

@@ -306,3 +306,9 @@ Esto es seguro: tus datos en `data/pihole/` se preservan.
 | Contraseña olvidada | Edita `.env`, vuelve a generar, ejecuta `docker compose up -d` |
 | Listas no se actualizan | `docker exec shield-pihole pihole -g` manual |
 | Un dominio se bloquea por error | `docker exec shield-pihole pihole allow dominio.com` |
+
+## Playbook: copia de seguridad, restauración y actualización
+
+1. Copia: `./backup.sh` → `backups/*.tar.gz` (guárdala fuera de la Pi).
+2. Restaurar tras formatear: clonar el repo, copiar el `.tar.gz` a `backups/` y ejecutar `./restore.sh backups/<archivo>`.
+3. Actualizar: `./update.sh` (hace copia antes).
