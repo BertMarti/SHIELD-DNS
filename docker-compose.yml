@@ -1,0 +1,19 @@
+version: '3.8'
+services:
+  shield-dns:
+    build: ./docker
+    ports:
+      - "8003:8000"
+      - "53:53/udp"
+      - "53:53/tcp"
+    volumes:
+      - shield-data:/app/data
+    networks:
+      - app-network
+
+volumes:
+  shield-data:
+
+networks:
+  app-network:
+    driver: bridge
