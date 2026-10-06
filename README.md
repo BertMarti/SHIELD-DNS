@@ -49,7 +49,7 @@ https://<IP-de-la-Raspberry-Pi>:8443/admin
 - **Chrome/Edge/Firefox**: haz clic en "Avanzado" → "Continuar a la página"
 - **Safari**: haz clic en "Mostrar detalles" → "Acceder a este sitio web"
 
-Usuario: `admin`  
+No hay usuario: Pi-hole solo pide la contraseña.  
 Contraseña: la que está en el archivo `.env` (variable `PIHOLE_PASSWORD`), generada durante la instalación.
 
 ## Uso día a día
@@ -130,14 +130,14 @@ docker exec shield-pihole pihole -g
 ```
 
 ### Desactivar temporalmente el bloqueo
-En el panel web, entra en "Sistema" → "Disable blocking" y elige por cuánto tiempo.
+En el menú lateral del panel web, pulsa "Disable blocking" y elige por cuánto tiempo.
 
 ## Puertos
 
 | Servicio | Puerto | Protocolo | Uso |
 |----------|--------|-----------|-----|
 | DNS | 53 | TCP/UDP | Resolución de DNS (obligatorio en la red) |
-| Panel HTTP | 8080 | TCP | Acceso web sin HTTPS (redirige a 8443) |
+| Panel HTTP | 8080 | TCP | Panel web sin cifrar (mejor usa el 8443) |
 | Panel HTTPS | 8443 | TCP | Panel web seguro (certificado autofirmado) |
 
 ## Características verificadas (2026-10-06)
@@ -152,7 +152,7 @@ En el panel web, entra en "Sistema" → "Disable blocking" y elige por cuánto t
 ## Limitaciones conocidas
 
 - **Estadísticas de Docker:** en Raspberry Pi, Docker muestra 0B de memoria incluso con contenedores activos. No es un problema; es una limitación del kernel (cgroup memory controller deshabilitado).
-- **Contexto local:** SHIELD-DNS solo sabe que un dominio está bloqueado; no distingue qué dispositivo lo solicitó (eso requeriría DNS cifrado por dispositivo).
+- **Clientes por la VPN:** las consultas que llegan a través de HEIMDALL aparecen en el panel con la IP interna de Docker, no con la del dispositivo concreto.
 
 ## Licencia
 

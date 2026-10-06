@@ -13,7 +13,7 @@
 | Bloquear un dominio | `docker exec shield-pihole pihole deny DOMINIO` | <5 seg |
 | Actualizar listas ahora | `docker exec shield-pihole pihole -g` | 1-2 min |
 | Ver logs en tiempo real | `docker compose logs -f pihole` | — |
-| Desactivar bloqueo temporalmente | Panel web → Sistema → Disable blocking | <5 seg |
+| Desactivar bloqueo temporalmente | Panel web → menú lateral → Disable blocking | <5 seg |
 | Verificar DNS funciona | `dig @IP example.com` | <5 seg |
 
 ---
@@ -50,7 +50,7 @@ sudo ss -tulpn | grep 53
 # Detén el servicio conflictivo:
 sudo systemctl disable --now systemd-resolved
 # O si es pihole-FTL nativo:
-sudo apt-get remove pihole-ftl
+sudo systemctl disable --now pihole-FTL
 # Vuelve a ejecutar:
 ./install.sh
 ```
@@ -72,7 +72,8 @@ nano .env
 docker compose up -d
 
 # Verifica que funciona
-curl -s https://localhost:8443/admin -k -u admin:NUEVA_PASSWORD | head -1
+curl -sk -X POST https://localhost:8443/api/auth -d '{"password":"NUEVA_PASSWORD"}'
+# Debe contener "valid": true
 ```
 
 **Nota:** no commitees `.env`; está en `.gitignore`.
@@ -199,7 +200,7 @@ docker compose logs -f pihole
 Si necesitas que ciertos dominios pasen temporalmente (ej. depurando):
 
 1. Accede a `https://<IP>:8443/admin`
-2. Botón "Disable blocking" (esquina superior derecha)
+2. Opción "Disable blocking" del menú lateral
 3. Elige duración: 10s, 5m, 30m, o "until re-enabled"
 4. El botón se volverá rojo mientras está desactivado
 

@@ -119,8 +119,8 @@ docker exec shield-pihole pihole-FTL sqlite3 /etc/pihole/gravity.db \
 **Comando:**
 ```bash
 IP=$(hostname -I | awk '{print $1}')
-curl -s -k -u admin:$(grep PIHOLE_PASSWORD .env | cut -d= -f2) \
-  https://$IP:8443/api/auth/session | jq .
+curl -sk -X POST https://$IP:8443/api/auth \
+  -d "{\"password\":\"$(grep ^PIHOLE_PASSWORD .env | cut -d= -f2)\"}" | jq .session.valid
 ```
 
 **Resultado:**
