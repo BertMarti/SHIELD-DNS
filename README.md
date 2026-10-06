@@ -1,52 +1,159 @@
-# 🛡️ SHIELD-DNS - Bloqueador de publicidad
+# SHIELD-DNS – Bloqueador de publicidad a nivel de DNS
 
-**Estado:** En desarrollo (esqueleto inicial)
-**Versión:** 0.1.0
-**Licencia:** MIT
+SHIELD-DNS es un bloqueador de anuncios y rastreadores para toda tu red. Se ejecuta en tu Raspberry Pi usando Pi-hole v6 con Unbound como resolución privada.
 
-## ¿Qué es SHIELD-DNS?
+## ¿Cómo funciona en tu casa?
 
-SHIELD-DNS es un **bloqueador de publicidad a nivel de DNS** que se ejecuta en tu Raspberry Pi. Cualquier dispositivo que lo use como DNS (directamente o a través de la VPN HEIMDALL) deja de cargar anuncios y rastreadores, sin instalar nada en él.
+**SHIELD-DNS** (este proyecto) + **HEIMDALL** (VPN) + **ARIA** (asistente IA):
 
-### Funcionalidades previstas
-
-- 🚫 Bloqueo de anuncios y rastreadores para toda la red y la VPN
-- 📋 Listas de bloqueo actualizadas automáticamente
-- 📊 Panel web con estadísticas
-- 🔐 Resolución privada con Unbound
-
-## Estado actual
-
-El repositorio contiene un servidor FastAPI mínimo (`/health` y un endpoint de prueba), el `Dockerfile` y el `docker-compose.yml`. El servidor DNS con listas de bloqueo está pendiente.
+- **SHIELD-DNS**: bloquea anuncios en el DNS (puerto 53). Todo dispositivo que lo use como DNS deja de cargar anuncios, sin instalar nada.
+- **HEIMDALL**: VPN WireGuard para acceder a la red desde fuera de casa (y a través de ella, usar SHIELD-DNS incluso en el móvil en ruta).
+- **ARIA**: asistente IA local con web UI en los puertos 80/443.
 
 ## Requisitos
 
-- Raspberry Pi 5 con Raspberry Pi OS de 64 bits, u otra distribución Linux
-- Docker y Docker Compose
-- Puerto 53 (UDP/TCP) libre en la Raspberry Pi
+- **Raspberry Pi** (4 o 5) con Raspberry Pi OS de 64 bits, u otra distribución Linux con Docker
+- **Docker y Docker Compose** (el instalador lo pone si falta)
+- **Puerto 53** (TCP/UDP) libre en la Raspberry Pi
+- Si otro servicio usa el puerto 53 (por ej. `systemd-resolved` o `pihole-FTL` nativo), el instalador lo detecta y para
 
-## Instalación
+## Instalación en 3 comandos
 
 ```bash
 git clone https://github.com/BertMarti/SHIELD-DNS.git
 cd SHIELD-DNS
-cp .env.example .env
+./install.sh
+```
+
+### Qué hace el instalador
+
+1. Instala Docker si no lo tienes (mediante el script oficial de Docker)
+2. Comprueba que el puerto 53 esté libre
+3. Crea el archivo `.env` y genera automáticamente una contraseña fuerte para el panel
+4. Descarga las imágenes Docker (Pi-hole y Unbound)
+5. Arranca los contenedores y espera a que estén listos
+6. Carga las listas de bloqueo (por defecto la lista HaGeZi, además de la lista por defecto de Pi-hole)
+7. Comprueba que el DNS responda correctamente
+
+El script es idempotente: puedes ejecutarlo varias veces sin problemas.
+
+## Primero: acceso al panel web
+
+Después de instalar, accede al panel:
+
+```
+https://<IP-de-la-Raspberry-Pi>:8443/admin
+```
+
+**Importante:** el certificado es autofirmado. Tu navegador te mostrará una advertencia. En:
+- **Chrome/Edge/Firefox**: haz clic en "Avanzado" → "Continuar a la página"
+- **Safari**: haz clic en "Mostrar detalles" → "Acceder a este sitio web"
+
+Usuario: `admin`  
+Contraseña: la que está en el archivo `.env` (variable `PIHOLE_PASSWORD`), generada durante la instalación.
+
+## Uso día a día
+
+### Pon SHIELD-DNS como DNS de tu red
+
+Opción 1: en el router (recomendado)
+- Entra en la configuración del router (suele ser `192.168.1.1`)
+- Busca "DHCP" o "DNS"
+- Pon la IP de la Raspberry Pi como servidor DNS primario
+- Todos los dispositivos nuevos de tu red lo usarán automáticamente
+
+Opción 2: en cada dispositivo
+- Móvil: Ajustes > Wi-Fi > (red) > Configuración avanzada > DNS
+- PC/Mac: Ajustes de red > DNS
+
+**Nota sobre IPv6:** algunos routers también reparten servidores DNS IPv6. Si tu dispositivo recibe un servidor IPv6 del router/ISP, puede saltarse SHIELD-DNS. Si esto ocurre:
+- Desactiva IPv6 en el router, o
+- Configura DNS IPv6 manualmente en cada dispositivo
+
+### Con HEIMDALL (VPN)
+
+Si tienes HEIMDALL instalado, la VPN ya configura automáticamente SHIELD-DNS como DNS. Los clientes VPN recibirán bloqueo de anuncios incluso conectados desde fuera de casa.
+
+## Actualizar
+
+```bash
+cd /ruta/a/SHIELD-DNS
+git pull
+docker compose pull
 docker compose up -d
 ```
 
-Después, pon la IP de la Raspberry Pi como DNS en el router o en cada dispositivo. Para saber la IP:
+## Desinstalar
 
+Sin borrar datos de Pi-hole (puedes reinstalar sin perder):
 ```bash
-hostname -I
+./uninstall.sh
 ```
 
-## Documentación para agentes
+Con purga completa (borra todo):
+```bash
+./uninstall.sh --purge
+```
 
-- [CLAUDE.md](CLAUDE.md) – instrucciones para Claude Code
-- [AGENTS.md](AGENTS.md) – reparto de tareas entre agentes
-- [SKILLS.md](SKILLS.md) – capacidades
-- [MEMORY.md](MEMORY.md) – memoria y decisiones del proyecto
+## Solución de problemas
+
+### El DNS no responde
+```bash
+docker compose logs pihole
+```
+
+### Cambiar la contraseña del panel
+1. Edita `.env` y cambia `PIHOLE_PASSWORD` a una nueva contraseña
+2. Ejecuta `docker compose up -d`
+3. Accede al panel con la nueva contraseña
+
+### Ver los registros en tiempo real
+```bash
+docker compose logs -f pihole
+```
+
+### Permitir o bloquear un dominio específico
+
+Bloquear un dominio (el panel también lo permite):
+```bash
+docker exec shield-pihole pihole deny ejemplo.com
+```
+
+Permitir un dominio (para sacarlo de la lista negra):
+```bash
+docker exec shield-pihole pihole allow ejemplo.com
+```
+
+### Actualizar las listas de bloqueo ahora mismo (sin esperar)
+```bash
+docker exec shield-pihole pihole -g
+```
+
+### Desactivar temporalmente el bloqueo
+En el panel web, entra en "Sistema" → "Disable blocking" y elige por cuánto tiempo.
+
+## Puertos
+
+| Servicio | Puerto | Protocolo | Uso |
+|----------|--------|-----------|-----|
+| DNS | 53 | TCP/UDP | Resolución de DNS (obligatorio en la red) |
+| Panel HTTP | 8080 | TCP | Acceso web sin HTTPS (redirige a 8443) |
+| Panel HTTPS | 8443 | TCP | Panel web seguro (certificado autofirmado) |
+
+## Características verificadas (2026-10-06)
+
+- ✓ Bloquea anuncios: `doubleclick.net` y `googleads.g.doubleclick.net` → `0.0.0.0`
+- ✓ Permite acceso normal: `github.com` resuelve correctamente
+- ✓ DNSSEC funciona: `dnssec-failed.org` retorna SERVFAIL como se espera
+- ✓ Listas: 232.079 dominios bloqueados
+- ✓ Panel: login por API funciona
+- ✓ Idempotencia: el instalador puede ejecutarse varias veces sin problemas
+
+## Limitaciones conocidas
+
+- **Estadísticas de Docker:** en Raspberry Pi, Docker muestra 0B de memoria incluso con contenedores activos. No es un problema; es una limitación del kernel (cgroup memory controller deshabilitado).
+- **Contexto local:** SHIELD-DNS solo sabe que un dominio está bloqueado; no distingue qué dispositivo lo solicitó (eso requeriría DNS cifrado por dispositivo).
 
 ## Licencia
 
-MIT
+MIT – 2026, BertMarti
