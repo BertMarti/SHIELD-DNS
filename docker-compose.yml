@@ -1,19 +1,48 @@
-version: '3.8'
-services:
-  shield-dns:
-    build: ./docker
-    ports:
-      - "8003:8000"
-      - "53:53/udp"
-      - "53:53/tcp"
-    volumes:
-      - shield-data:/app/data
-    networks:
-      - app-network
+name: shield-dns
 
-volumes:
-  shield-data:
+services:
+  unbound:
+    image: klutchell/unbound:latest
+    container_name: shield-unbound
+    restart: unless-stopped
+    networks:
+      shield:
+        ipv4_address: 172.30.53.2
+    healthcheck:
+      test: ["CMD", "drill-hc", "@127.0.0.1", "dnssec.works"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  pihole:
+    image: pihole/pihole:latest
+    container_name: shield-pihole
+    restart: unless-stopped
+    depends_on:
+      - unbound
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "${WEB_HTTP_PORT:-8080}:8080/tcp"
+      - "${WEB_HTTPS_PORT:-8443}:8443/tcp"
+    environment:
+      TZ: ${TZ:-Europe/Madrid}
+      FTLCONF_webserver_api_password: ${PIHOLE_PASSWORD:?Falta PIHOLE_PASSWORD en .env}
+      FTLCONF_webserver_port: "8080,8443s"
+      FTLCONF_dns_listeningMode: "ALL"
+      FTLCONF_dns_upstreams: "172.30.53.2#53"
+      FTLCONF_dns_dnssec: "false"
+      FTLCONF_webserver_interface_theme: "default-dark"
+    volumes:
+      - ./data/pihole:/etc/pihole
+    networks:
+      shield:
+        ipv4_address: 172.30.53.3
 
 networks:
-  app-network:
-    driver: bridge
+  shield:
+    name: shield-dns
+    ipam:
+      config:
+        - subnet: 172.30.53.0/24
