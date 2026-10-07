@@ -36,6 +36,11 @@ if ! grep -qE '^PIHOLE_PASSWORD=.+' .env; then
   sed -i "s|^PIHOLE_PASSWORD=.*|PIHOLE_PASSWORD=${PASS}|" .env
   ok "Contraseña del panel generada en .env"
 fi
+if ! grep -qE '^LOCAL_DNS_HOSTS=.+' .env; then
+  IP_PI="$(hostname -I | awk '{print $1}')"
+  if grep -qE '^LOCAL_DNS_HOSTS=' .env; then sed -i "s|^LOCAL_DNS_HOSTS=.*|LOCAL_DNS_HOSTS=\"${IP_PI} aria.lan\"|" .env; else echo "LOCAL_DNS_HOSTS=\"${IP_PI} aria.lan\"" >> .env; fi
+  ok "aria.lan → ${IP_PI} (para entrar en ARIA con https://aria.lan)"
+fi
 chmod 600 .env
 set -a; . ./.env; set +a
 mkdir -p data/pihole

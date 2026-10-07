@@ -34,6 +34,8 @@ services:
       FTLCONF_dns_upstreams: "172.30.53.2#53"
       FTLCONF_dns_dnssec: "false"
       FTLCONF_webserver_interface_theme: "default-dark"
+      # Nombres locales (p. ej. aria.lan) -> IP de la Raspberry. Formato: "IP nombre;IP nombre"
+      FTLCONF_dns_hosts: ${LOCAL_DNS_HOSTS:-}
     volumes:
       - ./data/pihole:/etc/pihole
     networks:
