@@ -157,3 +157,6 @@ Debe retornar `status: SERVFAIL`
 - Pi-hole: https://pi-hole.net/
 - Unbound: https://www.nlnetlabs.nl/projects/unbound/about/
 - Docker: https://docs.docker.com/
+
+## Otros modelos
+Para repartir tareas con otros modelos (Copilot, GPT, Gemini, gratuitos de OpenCode Zen) sigue `AGENTS.md` → «Trabajo con varios modelos»: Claude orquesta y revisa; los delegados trabajan en un worktree aparte y nunca reciben secretos ni datos personales.
