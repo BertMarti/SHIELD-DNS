@@ -284,6 +284,10 @@ Con ARIA tienes:
 - 💬 **Chat**: «¿cuántos anuncios has bloqueado hoy?», «pausa el bloqueador 10 minutos». En Telegram, `/bloqueo`.
 - 📡 **Inventario de red**: ARIA usa la tabla de dispositivos de Pi-hole.
 - 👨‍👧 **Control parental** por dispositivo (pausar internet, bloquear TikTok, YouTube…, horarios). ARIA crea en Pi-hole sus propios grupos (`ARIA-pausa`, `ARIA-svc-…`) y solo toca lo que ella crea. Es bloqueo por DNS: no frena DNS fijos, DNS cifrado ni VPN.
+- 🔒 **«DNS privado» bajo control**: el servicio `dns-privado` del control parental bloquea solo los nombres de los servidores DNS cifrados conocidos (DoH/DoT), para que un móvil no se salte el filtro. No toca la publicidad ni la VPN, y se aplica por dispositivo.
+- 📋 **Listas de bloqueo** desde ARIA: ver cuántos dominios hay y **actualizar las listas** (gravity) con un botón.
+- 📊 **Estadísticas por dispositivo** (consultas y bloqueos de cada uno en 24 h o 7 días) y un **informe semanal** por Telegram.
+- 📰 El **resumen diario** de ARIA incluye los bloqueos del día y avisa si SHIELD-DNS no responde.
 - 🔔 **Avisos** si SHIELD-DNS se cae o deja de responder.
 - 🏷️ `https://aria.lan` para entrar en ARIA desde casa.
 - 🌍 Con un dominio en Cloudflare, el panel en `https://shield.tu-dominio.com` (ver la [guía de ARIA](https://github.com/BertMarti/ARIA/blob/main/docs/INSTALACION.md)).
