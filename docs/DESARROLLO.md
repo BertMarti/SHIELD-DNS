@@ -12,7 +12,7 @@ SHIELD-DNS combina Pi-hole v6 y Unbound en Docker para filtrar DNS en una red do
 
 ## Servicios y red
 
-La red Docker `shield-dns` es `172.30.53.0/24`. Unbound tiene `172.30.53.2:53` y Pi-hole `172.30.53.3:53`. Pi-hole usa `172.30.53.2#53` como upstream. Solo Pi-hole publica DNS y panel; Unbound es interno.
+La red Docker `shield-dns` es una subred /24 privada con IPs fijas para cada contenedor (los valores exactos están en `docker-compose.yml`). Pi-hole usa la IP fija de Unbound, puerto 53, como único upstream (`FTLCONF_dns_upstreams`). Solo Pi-hole publica DNS y panel; Unbound es interno.
 
 | Servicio | Imagen actual | Uso |
 |---|---|---|

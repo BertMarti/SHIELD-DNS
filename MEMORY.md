@@ -6,14 +6,14 @@
 
 - Pi-hole ofrece panel, listas, estadísticas y API REST.
 - Unbound resuelve de forma privada y valida DNSSEC.
-- Pi-hole delega en Unbound mediante `172.30.53.2`.
+- **Integración:** Pi-hole delega las consultas DNS a Unbound (172.30.53.2) para máxima privacidad
 
 ### Red Docker
 
 ```text
 docker network shield-dns (172.30.53.0/24)
 ├── Unbound (172.30.53.2:53)
-└── Pi-hole (172.30.53.3:53) -> upstream a Unbound
+└── Pi-hole (172.30.53.3:53) → upstream a Unbound
 ```
 
 La red privada evita que los contenedores usen el DNS del host y previene bucles. `FTLCONF_dns_dnssec` permanece en `false` porque Unbound ya valida DNSSEC.

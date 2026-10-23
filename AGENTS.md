@@ -4,7 +4,7 @@ SHIELD-DNS es un bloqueador de anuncios, rastreadores y dominios maliciosos para
 
 ## Estructura
 
-- `docker-compose.yml`: Pi-hole y Unbound, red fija `172.30.53.0/24`.
+- `docker-compose.yml`: Pi-hole y Unbound, red Docker interna con IPs fijas (ver `docker-compose.yml`).
 - `install.sh`, `update.sh`, `backup.sh`, `restore.sh`, `uninstall.sh`: operación.
 - `README.md`: guía de usuario; `docs/DESARROLLO.md`: guía técnica.
 - `site/`: web estática publicada en Pages.
