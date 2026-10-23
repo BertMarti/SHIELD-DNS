@@ -42,7 +42,10 @@ if ! grep -qE '^LOCAL_DNS_HOSTS=.+' .env; then
   ok "aria.lan → ${IP_PI} (para entrar en ARIA con https://aria.lan)"
 fi
 chmod 600 .env
-set -a; . ./.env; set +a
+set -a
+# shellcheck source=/dev/null
+. ./.env
+set +a
 mkdir -p data/pihole
 
 # 4. Arranque
@@ -50,7 +53,8 @@ info "Arrancando contenedores..."
 $DOCKER compose up -d
 
 info "Esperando a que Pi-hole esté listo..."
-for i in $(seq 1 60); do
+estado="starting"
+for _ in $(seq 1 60); do
   estado="$($DOCKER inspect -f '{{.State.Health.Status}}' shield-pihole 2>/dev/null || echo starting)"
   [ "$estado" = "healthy" ] && break
   sleep 3

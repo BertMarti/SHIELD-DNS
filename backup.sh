@@ -19,5 +19,6 @@ cp .env "$TMP/.env"
 ARCHIVO="backups/shield-dns-$(date +%Y%m%d-%H%M).tar.gz"
 tar -czf "$ARCHIVO" -C "$TMP" .env teleporter.zip
 chmod 600 "$ARCHIVO"
+# shellcheck disable=SC2012  # nombres generados por este script (sin espacios)
 ls -1t backups/shield-dns-*.tar.gz | tail -n +8 | xargs -r rm -f
 echo "Copia creada: $(pwd)/$ARCHIVO ($(du -h "$ARCHIVO" | cut -f1))"
