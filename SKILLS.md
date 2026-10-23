@@ -68,7 +68,7 @@ Pulsa `Ctrl+C` para salir. `SERVFAIL` en un dominio con DNSSEC inválido es el r
 
 ## 8. Pausar el bloqueo
 
-En el panel, abre **Disable blocking** y selecciona 10 segundos, 5 minutos, 30 minutos o hasta reactivarlo.
+En el panel, abre **Disable blocking** y elige indefinidamente, 10 segundos, 30 segundos, 5 minutos o un tiempo personalizado.
 
 ## 9. Verificar DNS
 

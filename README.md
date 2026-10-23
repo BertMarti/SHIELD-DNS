@@ -186,7 +186,7 @@ nslookup example.com 192.168.1.50      # debe devolver una IP normal
 | Permitir un dominio | **Query Log** → el dominio bloqueado → permitir (o **Domains** → *Allow*). |
 | Bloquear un dominio | **Domains** → *Deny*. |
 | Actualizar listas ahora | **Tools** → **Update Gravity**. |
-| Pausar el bloqueo | **Disable blocking**: 10 s, 5 min, 30 min o hasta reactivar. |
+| Pausar el bloqueo | **Disable blocking**: indefinidamente, 10 s, 30 s, 5 min o un tiempo personalizado. |
 
 Las mismas tareas desde la terminal (y los registros) están en la [guía técnica](docs/DESARROLLO.md).
 
