@@ -13,7 +13,10 @@
 </p>
 
 <p align="center">
+  <a href="https://bertmarti.github.io/SHIELD-DNS/"><img alt="Web en GitHub Pages" src="https://img.shields.io/badge/web-GitHub%20Pages-38d6ff?style=flat-square"></a>
+  <a href="https://github.com/BertMarti/SHIELD-DNS/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/BertMarti/SHIELD-DNS/actions/workflows/ci.yml/badge.svg"></a>
   <a href="LICENSE"><img alt="Licencia MIT" src="https://img.shields.io/badge/licencia-MIT-34d399?style=flat-square"></a>
+  <img alt="Gratis" src="https://img.shields.io/badge/precio-gratis-7c8cff?style=flat-square">
   <img alt="100 % autoalojado" src="https://img.shields.io/badge/100%20%25-autoalojado-34d399?style=flat-square">
   <img alt="Docker Compose" src="https://img.shields.io/badge/Docker-Compose-2496ED?style=flat-square&logo=docker&logoColor=white">
   <img alt="Pi-hole v6" src="https://img.shields.io/badge/Pi--hole-v6-96060C?style=flat-square&logo=pihole&logoColor=white">
@@ -29,12 +32,9 @@
 
 **SHIELD-DNS atrapa anuncios antes de que lleguen a tu casa.** Es un bloqueador de anuncios, rastreadores y dominios maliciosos para toda la red: Pi-hole filtra las consultas y Unbound las resuelve de forma independiente con validación DNSSEC.
 
-<p align="left"><img src="docs/img/ping/ping-hola.svg" alt="Ping: «¡Eh, mira! 1.284 anuncios atrapados hoy»"></p>
+<p align="center"><a href="https://bertmarti.github.io/SHIELD-DNS/"><b>🌐 Ver la web de SHIELD-DNS: instalación paso a paso con capturas</b></a></p>
 
-<a id="ping"></a>
-## 🧚 Ping
-
-Ping es el hada de luz de ARIA que aquí vigila la puerta y atrapa anuncios antes de que entren. Sus avisos aparecen junto a las partes importantes del manual, sin galería aparte.
+<p align="right"><img src="docs/img/ping/ping-web.svg" alt="Ping: «Tengo web nueva: pasa, que allí no entra ni un anuncio»"></p>
 
 Instálalo en una Raspberry Pi o en cualquier Linux con Docker. Después apunta el router a `192.168.1.50` y móviles, teles, consolas y ordenadores quedan protegidos sin instalar nada en cada dispositivo.
 
@@ -61,6 +61,13 @@ flowchart LR
 3. Comprueba una consulta bloqueada y una normal.
 4. Gestiona listas, grupos y estadísticas desde Pi-hole o ARIA.
 
+<p align="left"><img src="docs/img/ping/ping-hola.svg" alt="Ping: «¡Eh, mira! 1.284 anuncios atrapados hoy»"></p>
+
+<a id="ping"></a>
+## 🧚 Ping
+
+Ping es el hada de luz de ARIA; en SHIELD-DNS **atrapa anuncios** antes de que entren en casa. Sus avisos aparecen junto a las partes importantes del manual.
+
 ## 📑 Índice
 
 - [🔍 Qué incluye](#que-incluye)
@@ -74,7 +81,6 @@ flowchart LR
 - [🔐 Con HEIMDALL](#con-heimdall)
 - [💾 Copias y actualizaciones](#copias-y-actualizaciones)
 - [🆘 Problemas frecuentes](#problemas-frecuentes)
-- [🔌 Puertos](#puertos)
 - [🌐 Ecosistema ARIA](#ecosistema-aria)
 - [📄 Licencia](#licencia)
 
@@ -126,27 +132,14 @@ Panel: `https://192.168.1.50:8443/admin`. El certificado es autofirmado. La cont
 grep PIHOLE_PASSWORD .env
 ```
 
+<p align="right"><a href="#readme-top">⬆️ Volver arriba</a></p>
+
 <a id="configuracion"></a>
 ## ⚙️ Configuración
 
-Edita `.env` y vuelve a ejecutar `./install.sh` para aplicar los valores:
-
-| Variable | Valor inicial | Uso |
-|---|---|---|
-| `TZ` | `Europe/Madrid` | Zona horaria de los contenedores. |
-| `PIHOLE_PASSWORD` | Aleatoria | Contraseña del panel y de la API. |
-| `WEB_HTTP_PORT` | `8080` | Panel HTTP. |
-| `WEB_HTTPS_PORT` | `8443` | Panel HTTPS. |
-| `LOCAL_DNS_HOSTS` | `"<IP> aria.lan"` | Nombres locales con formato `IP nombre;IP nombre`. |
-| `EXTRA_ADLISTS` | HaGeZi Multi y TIF mini | URLs separadas por espacios. |
-
-Para añadir otro nombre local:
-
-```bash
-LOCAL_DNS_HOSTS="192.168.1.50 aria.lan;192.168.1.50 nas.lan"
-```
-
-Las listas, dominios permitidos/bloqueados, clientes y grupos también se administran desde el panel de Pi-hole.
+Todo se guarda en `.env` (lo crea y rellena `install.sh`). Si cambias algo, vuelve a ejecutar `./install.sh`.
+Las listas, los dominios permitidos o bloqueados, los clientes y los grupos se administran desde el panel de Pi-hole.
+La tabla de variables y los nombres locales extra (como `nas.lan`) están en la [guía técnica](docs/DESARROLLO.md#configuracion).
 
 <a id="apuntarlo-como-dns"></a>
 ## 📡 Apuntarlo como DNS
@@ -159,7 +152,10 @@ Las listas, dominios permitidos/bloqueados, clientes y grupos también se admini
 4. Deja vacío el secundario o repite `192.168.1.50`. Un DNS externo permite saltarse el bloqueo.
 5. Guarda y renueva el Wi-Fi o el DHCP de los dispositivos.
 
-Si el router no deja cambiar el DNS, puedes desactivar su DHCP y activar el DHCP de Pi-hole desde *Settings → DHCP*. Hazlo solo cuando tengas acceso al panel.
+Si el router no deja cambiar el DNS, ponlo a mano en cada dispositivo (tabla de abajo). El DHCP de Pi-hole **no funciona con esta instalación**: Pi-hole está en una red Docker en modo puente y no recibe las peticiones DHCP de la casa.
+
+> [!WARNING]
+> No abras el puerto 53 ni el panel (8080/8443) en el router. El DNS solo debe responder dentro de casa y, si usas HEIMDALL, desde la VPN.
 
 ### Un dispositivo concreto
 
@@ -179,18 +175,20 @@ nslookup doubleclick.net 192.168.1.50  # debe devolver 0.0.0.0
 nslookup example.com 192.168.1.50      # debe devolver una IP normal
 ```
 
+<p align="right"><a href="#readme-top">⬆️ Volver arriba</a></p>
+
 <a id="operacion-diaria"></a>
 ## 🧭 Operación diaria
 
-| Necesidad | Acción |
+| Necesidad | Acción en el panel |
 |---|---|
-| Ver consultas y bloqueos | Panel → **Dashboard** o **Query Log**. |
-| Permitir un dominio | `docker exec shield-pihole pihole allow ejemplo.com` |
-| Bloquear un dominio | `docker exec shield-pihole pihole deny ejemplo.com` |
-| Actualizar listas ahora | `docker exec shield-pihole pihole -g` |
-| Pausar el bloqueo | Panel → **Disable blocking**; Pi-hole ofrece 10 s, 5 min, 30 min o hasta reactivar. |
-| Ver logs | `docker compose logs -f pihole` |
-| Ver estado | `docker compose ps` |
+| Ver consultas y bloqueos | **Dashboard** o **Query Log**. |
+| Permitir un dominio | **Query Log** → el dominio bloqueado → permitir (o **Domains** → *Allow*). |
+| Bloquear un dominio | **Domains** → *Deny*. |
+| Actualizar listas ahora | **Tools** → **Update Gravity**. |
+| Pausar el bloqueo | **Disable blocking**: 10 s, 5 min, 30 min o hasta reactivar. |
+
+Las mismas tareas desde la terminal (y los registros) están en la [guía técnica](docs/DESARROLLO.md).
 
 El bloqueo DNS no puede distinguir un anuncio que comparte dominio con el contenido, como algunos anuncios de vídeo. Si una app se rompe, busca el dominio en **Query Log** y añádelo a la allowlist solo si confías en él.
 
@@ -224,6 +222,8 @@ El control parental es bloqueo DNS: no puede impedir DNS fijado manualmente, tod
   <img alt="Tarjeta de SHIELD-DNS en el Centro de control de ARIA" src="docs/img/captura-aria-shield.png" width="72%">
   <br><sub>Tarjeta de SHIELD-DNS en ARIA con datos de demostración.</sub>
 </p>
+
+<p align="right"><a href="#readme-top">⬆️ Volver arriba</a></p>
 
 <a id="con-heimdall"></a>
 ## 🔐 Con HEIMDALL
@@ -265,6 +265,8 @@ El script pide confirmación, restaura `.env`, instala y carga de nuevo la confi
 ```
 
 Hace una copia, ejecuta `git pull --ff-only`, descarga imágenes nuevas y vuelve a instalar. Los datos de `data/pihole/` se conservan.
+
+<p align="right"><a href="#readme-top">⬆️ Volver arriba</a></p>
 
 <a id="problemas-frecuentes"></a>
 ## 🆘 Problemas frecuentes
@@ -313,18 +315,7 @@ Usa `https://192.168.1.50:8443/admin`, con `/admin`, y revisa `docker compose lo
 Unbound es quien valida DNSSEC; Pi-hole lo deja desactivado para no validarlo dos veces. Comprueba el resolvedor con `docker compose logs unbound` y el estado con `docker compose ps`.
 </details>
 
-<a id="puertos"></a>
-## 🔌 Puertos
-
-| Contenedor | Puerto | Uso |
-|---|---|---|
-| `shield-pihole` | `53/tcp` y `53/udp` | DNS de la red. |
-| `shield-pihole` | `8080/tcp` | Panel HTTP. |
-| `shield-pihole` | `8443/tcp` | Panel HTTPS autofirmado. |
-| `shield-unbound` | Interno | Resolvedor en la red Docker `172.30.53.0/24`. |
-
-> [!WARNING]
-> No abras estos puertos en el router. El DNS solo debe responder desde la LAN y, si procede, desde la VPN.
+<p align="right"><a href="#readme-top">⬆️ Volver arriba</a></p>
 
 <a id="ecosistema-aria"></a>
 ## 🌐 Ecosistema ARIA
@@ -339,5 +330,7 @@ Unbound es quien valida DNSSEC; Pi-hole lo deja desactivado para no validarlo do
 ## 📄 Licencia
 
 MIT. Consulta [LICENSE](LICENSE).
+
+🛠️ ¿Quieres modificar SHIELD-DNS? Mira la [guía técnica](docs/DESARROLLO.md). Para avisar de un fallo de seguridad: [SECURITY.md](SECURITY.md).
 
 <p align="right"><img src="docs/img/ping/ping-despedida.svg" alt="Ping: «Menos anuncios, más paz en casa»"><br><a href="#readme-top">⬆️ Volver arriba</a></p>
