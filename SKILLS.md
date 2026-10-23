@@ -3,248 +3,80 @@
 ## Tabla de procedimientos
 
 | Procedimiento | Comando | Tiempo |
-|---------------|---------|--------|
-| Instalar SHIELD-DNS | `./install.sh` | 2-3 min |
-| Desinstalar (mantener datos) | `./uninstall.sh` | <30 seg |
-| Desinstalar (purgar todo) | `./uninstall.sh --purge` | <30 seg |
-| Actualizar a última versión | `git pull && docker compose pull && docker compose up -d` | 1-2 min |
-| Cambiar contraseña panel | Editar `.env` + `docker compose up -d` | 1 min |
-| Permitir un dominio | `docker exec shield-pihole pihole allow DOMINIO` | <5 seg |
-| Bloquear un dominio | `docker exec shield-pihole pihole deny DOMINIO` | <5 seg |
-| Actualizar listas ahora | `docker exec shield-pihole pihole -g` | 1-2 min |
-| Ver logs en tiempo real | `docker compose logs -f pihole` | — |
-| Desactivar bloqueo temporalmente | Panel web → menú lateral → Disable blocking | <5 seg |
-| Verificar DNS funciona | `dig @IP example.com` | <5 seg |
+|---|---|---|
+| Instalar | `./install.sh` | 2-3 min |
+| Desinstalar manteniendo datos | `./uninstall.sh` | <30 s |
+| Desinstalar y purgar | `./uninstall.sh --purge` | <30 s |
+| Actualizar correctamente | `./update.sh` | 1-2 min |
+| Cambiar contraseña | Editar `.env` + `docker compose up -d` | 1 min |
+| Permitir un dominio | `docker exec shield-pihole pihole allow DOMINIO` | <5 s |
+| Bloquear un dominio | `docker exec shield-pihole pihole deny DOMINIO` | <5 s |
+| Actualizar listas | `docker exec shield-pihole pihole -g` | 1-2 min |
+| Ver logs | `docker compose logs -f pihole` | — |
+| Pausar bloqueo | Panel → Disable blocking | <5 s |
+| Comprobar DNS | `dig @192.168.1.50 tu-dominio.com` | <5 s |
 
----
-
-## 1. Instalar SHIELD-DNS
-
-### Requisitos previos
-- Raspberry Pi con SSH habilitado
-- Docker y Docker Compose (el script lo instala si falta)
-- Puerto 53 (TCP/UDP) libre
-
-### Pasos
+## 1. Instalar
 
 ```bash
-ssh pi@raspberrypi.local
-cd ~
-git clone https://github.com/BertMarti/SHIELD-DNS.git
-cd SHIELD-DNS
 ./install.sh
 ```
 
-**Resultado esperado:**
-```
-✔ Docker disponible
-✔ Creado .env
-✔ Contraseña del panel generada en .env
-✔ Pi-hole funcionando
-✔ El DNS responde
-```
+El script comprueba Docker, Compose y el puerto 53, crea `.env`, genera la contraseña, arranca los contenedores, carga `EXTRA_ADLISTS` y prueba el DNS. Si el puerto está ocupado, revisar el servicio y repetir. No activar el DHCP de Pi-hole: esta instalación usa una red Docker puente que no recibe DHCP de la LAN.
 
-### Si falla: puerto 53 ocupado
-```bash
-sudo ss -tulpn | grep 53
-# Detén el servicio conflictivo:
-sudo systemctl disable --now systemd-resolved
-# O si es pihole-FTL nativo:
-sudo systemctl disable --now pihole-FTL
-# Vuelve a ejecutar:
-./install.sh
-```
+## 2. Cambiar la contraseña en Pi-hole v6
 
----
-
-## 2. Cambiar la contraseña del panel web
-
-### Pasos
+Edita `.env`, cambia `PIHOLE_PASSWORD` y aplica:
 
 ```bash
-cd /ruta/a/SHIELD-DNS
-# Edita .env con tu editor favorito
-nano .env
-# Busca PIHOLE_PASSWORD= y pon una contraseña nueva
-# Guarda (Ctrl+X en nano)
-
-# Aplica el cambio
 docker compose up -d
-
-# Verifica que funciona
-curl -sk -X POST https://localhost:8443/api/auth -d '{"password":"NUEVA_PASSWORD"}'
-# Debe contener "valid": true
 ```
 
-**Nota:** no commitees `.env`; está en `.gitignore`.
+La API de v6 usa `POST /api/auth` con JSON. No uses autenticación básica ni guardes la contraseña en el repositorio.
 
----
-
-## 3. Permitir un dominio específico (sacarlo de la lista negra)
-
-### Si sabes qué dominio lo necesita (ej. "ejemplo.com está bloqueado por error")
+## 3. Permitir un dominio
 
 ```bash
-docker exec shield-pihole pihole allow ejemplo.com
+docker exec shield-pihole pihole allow tu-dominio.com
 ```
 
-**Resultado:**
-```
-✔ Allowlisting ejemplo.com
-```
+También puede hacerse desde **Allowlist** en el panel.
 
-### Alternativa: desde el panel web
-1. Accede a `https://<IP>:8443/admin`
-2. "Allowlist" en la barra lateral → "Dominio"
-3. Introduce `ejemplo.com`
-4. Clic en "Añadir a allowlist"
-
----
-
-## 4. Bloquear un dominio específico
-
-### Comando
+## 4. Bloquear un dominio
 
 ```bash
-docker exec shield-pihole pihole deny ejemplo.com
+docker exec shield-pihole pihole deny tu-dominio.com
 ```
 
-**Resultado:**
-```
-✔ Denylisting ejemplo.com
-```
+## 5. Añadir una lista permanente
 
-### Desde el panel
-1. Accede a `https://<IP>:8443/admin`
-2. "Denylist" → "Dominio"
-3. Introduce `ejemplo.com`
-4. Clic en "Añadir a denylist"
+Edita `.env.example`, ajusta `EXTRA_ADLISTS` con URLs separadas por espacios y ejecuta `./install.sh`. Los cambios de documentación o plantilla se revisan antes de hacer commit.
 
----
-
-## 5. Añadir una nueva lista de bloqueo
-
-### Opción A: Permanente (recomendado)
-
-1. Edita `.env.example`:
-   ```bash
-   EXTRA_ADLISTS="https://lista1.txt https://lista2.txt"
-   ```
-
-2. Ejecuta el instalador (es idempotente):
-   ```bash
-   ./install.sh
-   ```
-
-3. Commitea el cambio:
-   ```bash
-   git add .env.example
-   git commit -m "Añadir nueva lista de bloqueo"
-   git push
-   ```
-
-### Opción B: Temporal (una sola vez, sin persistencia)
-
-```bash
-docker exec shield-pihole pihole-FTL sqlite3 /etc/pihole/gravity.db \
-  "INSERT OR IGNORE INTO adlist (address, enabled, comment) VALUES \
-  ('https://nueva-lista.txt', 1, 'Manual');"
-
-# Actualiza las listas
-docker exec shield-pihole pihole -g
-```
-
----
-
-## 6. Actualizar las listas de bloqueo ahora mismo
-
-Por defecto, Pi-hole las actualiza cada lunes a las 02:00 UTC. Para hacerlo ya:
+## 6. Actualizar listas
 
 ```bash
 docker exec shield-pihole pihole -g
 ```
 
-**Resultado esperado:**
-```
-✔ Retrieving blocklist 1 of 3 (StevenBlack)
-✔ Retrieving blocklist 2 of 3 (HaGeZi Multi)
-✔ Gravity rebuild done
-```
+## 7. Ver logs
 
-Esto puede tardar 1-2 minutos. Ver progreso:
 ```bash
 docker compose logs -f pihole
 ```
 
----
+Pulsa `Ctrl+C` para salir. `SERVFAIL` en un dominio con DNSSEC inválido es el resultado esperado.
 
-## 7. Ver los logs en tiempo real
+## 8. Pausar el bloqueo
 
-```bash
-cd /ruta/a/SHIELD-DNS
-docker compose logs -f pihole
-```
+En el panel, abre **Disable blocking** y selecciona 10 segundos, 5 minutos, 30 minutos o hasta reactivarlo.
 
-**Ctrl+C para salir**
-
-### Logs útiles
-
-- `Blocking doubleclick.net` → funciona el bloqueo
-- `dnssec-failed.org: SERVFAIL` → DNSSEC funciona
-- `Client 192.168.1.100 (dispositivo): example.com (A)` → consulta DNS
-
----
-
-## 8. Desactivar el bloqueo temporalmente
-
-Si necesitas que ciertos dominios pasen temporalmente (ej. depurando):
-
-1. Accede a `https://<IP>:8443/admin`
-2. Opción "Disable blocking" del menú lateral
-3. Elige duración: 10s, 5m, 30m, o "until re-enabled"
-4. El botón se volverá rojo mientras está desactivado
-
-**Resultado:** todas las consultas DNS pasan sin bloqueo durante el tiempo elegido.
-
----
-
-## 9. Verificar que el DNS responde
-
-### Desde la Raspberry Pi misma
+## 9. Verificar DNS
 
 ```bash
-docker exec shield-pihole dig @127.0.0.1 example.com +short
+docker exec shield-pihole dig @127.0.0.1 tu-dominio.com +short
 ```
 
-**Resultado:** la dirección IP de `example.com`
-
-### Desde otro dispositivo en la red
-
-```bash
-dig @IP-de-la-Raspberry example.com +short
-# ej: dig @192.168.1.10 example.com +short
-```
-
-### Verificar bloqueo de anuncios
-
-```bash
-dig @IP-de-la-Raspberry doubleclick.net +short
-```
-
-**Resultado:** `0.0.0.0` (bloqueado)
-
-### Verificar DNSSEC
-
-```bash
-dig @127.0.0.1 dnssec-failed.org
-```
-
-Busca en la respuesta:
-```
-;; ->>HEADER<<- opcode: QUERY, status: SERVFAIL, id: xxxxx
-```
-
----
+La consulta bloqueada devuelve `0.0.0.0`; la prueba DNSSEC devuelve `SERVFAIL`.
 
 ## 10. Desinstalar sin perder datos
 
@@ -252,15 +84,7 @@ Busca en la respuesta:
 ./uninstall.sh
 ```
 
-**Resultado:**
-```
-Contenedores de SHIELD-DNS detenidos y eliminados.
-Recuerda volver a poner el DNS de tu router si apuntaba a esta Raspberry Pi.
-```
-
-Los datos de Pi-hole se conservan en `data/pihole/`. Puedes reinstalar con `./install.sh` y recuperarás toda la configuración.
-
----
+Los datos de `data/pihole/` y `.env` se conservan. Devuelve el DNS anterior al router si era necesario.
 
 ## 11. Desinstalar y borrar todo
 
@@ -268,47 +92,30 @@ Los datos de Pi-hole se conservan en `data/pihole/`. Puedes reinstalar con `./in
 ./uninstall.sh --purge
 ```
 
-**Resultado:**
-```
-Contenedores de SHIELD-DNS detenidos y eliminados.
-Datos y .env eliminados.
-```
+Borra `data/` y `.env`. Es irreversible sin una copia.
 
-Esto borra `data/` y `.env`. La próxima instalación empezará desde cero.
-
----
-
-## 12. Actualizar a la última versión
+## 12. Actualizar
 
 ```bash
-cd /ruta/a/SHIELD-DNS
-git pull
-docker compose pull
-docker compose up -d
+./update.sh
 ```
 
-**Resultado:**
-- `git pull` trae cambios del repositorio
-- `docker compose pull` descarga nuevas imágenes (si las hay)
-- `docker compose up -d` reinicia los contenedores
-
-Esto es seguro: tus datos en `data/pihole/` se preservan.
-
----
+Es el procedimiento correcto: hace una copia, ejecuta `git pull --ff-only`, descarga imágenes, reinstala y elimina imágenes sin usar. No sustituirlo por una secuencia manual.
 
 ## Troubleshooting rápido
 
-| Problema | Solución |
-|----------|----------|
-| DNS no responde | `docker compose logs pihole` → busca `ERROR` |
-| Panel devuelve 502 | Reinicia: `docker compose restart pihole` |
-| Puerto 53 sigue ocupado después de desinstalar | `sudo ss -tulpn \| grep 53` + detén el servicio |
-| Contraseña olvidada | Edita `.env`, vuelve a generar, ejecuta `docker compose up -d` |
-| Listas no se actualizan | `docker exec shield-pihole pihole -g` manual |
-| Un dominio se bloquea por error | `docker exec shield-pihole pihole allow dominio.com` |
+| Problema | Acción |
+|---|---|
+| DNS no responde | `docker compose logs pihole` y `docker compose ps`. |
+| Puerto 53 ocupado | `sudo ss -tulpn` y detener el servicio conflictivo. |
+| Panel no carga | Revisar `https://192.168.1.50:8443/admin` y los logs. |
+| Contraseña olvidada | Editar `.env` y ejecutar `docker compose up -d`. |
+| Lista no actualiza | Ejecutar `docker exec shield-pihole pihole -g`. |
+| Dominio bloqueado por error | Usar `pihole allow DOMINIO`. |
+| DHCP no funciona | No es compatible con esta red puente; configurar DNS manualmente. |
 
-## Playbook: copia de seguridad, restauración y actualización
+## Playbook
 
-1. Copia: `./backup.sh` → `backups/*.tar.gz` (guárdala fuera de la Pi).
-2. Restaurar tras formatear: clonar el repo, copiar el `.tar.gz` a `backups/` y ejecutar `./restore.sh backups/<archivo>`.
-3. Actualizar: `./update.sh` (hace copia antes).
+1. Copia: `./backup.sh`; guarda `backups/*.tar.gz` fuera de la máquina.
+2. Restauración: clona el repositorio, copia el archivo a `backups/` y ejecuta `./restore.sh backups/<archivo>`.
+3. Actualización: `./update.sh`, que hace la copia antes del cambio.
