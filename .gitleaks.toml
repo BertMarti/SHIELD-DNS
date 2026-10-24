@@ -1,0 +1,13 @@
+# Configuración de gitleaks para SHIELD-DNS.
+# Usa las reglas por defecto y solo permite un marcador de EJEMPLO concreto que está en el historial
+# de la documentación (revisado a mano el 24/10/2026: no es una credencial real).
+title = "gitleaks SHIELD-DNS"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Marcador de ejemplo en la documentación antigua (curl -u admin:NUEVA_PASSWORD)"
+targetRules = ["curl-auth-user"]
+regexTarget = "secret"
+regexes = ['''^admin:NUEVA_PASSWORD$''']

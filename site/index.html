@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="SHIELD-DNS bloquea anuncios, rastreadores y dominios maliciosos para toda tu casa.">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#070b12">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' data:; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <title>SHIELD-DNS · Bloqueador de anuncios para toda la casa</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="estilos.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="salto" href="#contenido">Saltar al contenido</a>
+  <header class="cabecera">
+    <div class="barra">
+      <a class="marca" href="index.html" aria-label="SHIELD-DNS, inicio"><svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 20 6v5c0 5-3 8-8 10-5-2-8-5-8-10V6zM8 12l3 3 5-6"/></svg> SHIELD-DNS</a>
+      <nav class="nav" aria-label="Navegación principal"><a href="#que-es">Qué es</a><a href="#como-funciona">Cómo funciona</a><a href="#instalar">Instalar</a><a href="#usar">Usar</a><a href="#aria">ARIA</a><a href="#preguntas">Preguntas</a></nav>
+      <button class="tema" type="button" aria-label="Cambiar al tema claro" aria-pressed="false"><span class="tema-icono" aria-hidden="true">☼</span> Tema</button>
+    </div>
+    <p class="ecosistema">Parte del ecosistema ARIA · <a href="https://github.com/BertMarti/ARIA" rel="noopener noreferrer">ARIA</a> · <a href="index.html">SHIELD-DNS</a> · <a href="https://bertmarti.github.io/HEIMDALL/" rel="noopener noreferrer">HEIMDALL</a></p>
+  </header>
+
+  <main id="contenido">
+    <section class="hero contenedor" aria-labelledby="titulo">
+      <div class="hero-copy"><p class="ceja">La red de casa, más tranquila</p><h1 id="titulo">Atrapa los anuncios antes de que entren en casa</h1><p class="intro">Un bloqueador de anuncios, rastreadores y dominios maliciosos para toda la red, sin instalar nada en cada dispositivo.</p><div class="acciones"><a class="boton primario" href="#instalar">Instalar paso a paso</a><a class="boton secundario" href="https://github.com/BertMarti/SHIELD-DNS" rel="noopener noreferrer">Ver en GitHub</a></div></div>
+      <picture class="hero-art"><source media="(prefers-color-scheme: light)" srcset="img/banner-claro.svg"><img src="img/banner-oscuro.svg" alt="SHIELD-DNS: bloqueador de anuncios y rastreadores para toda la casa" width="1280" height="360"></picture>
+      <img class="ping izquierda" src="img/ping/ping-web.svg" alt="Ping: «Tengo web nueva: pasa, que allí no entra ni un anuncio»" width="492" height="136" loading="lazy">
+    </section>
+
+    <section class="seccion contenedor" id="que-es" aria-labelledby="que-es-titulo">
+      <div class="encabezado"><p class="ceja">La idea sencilla</p><h2 id="que-es-titulo">¿Qué es SHIELD-DNS?</h2><p>Se instala una vez en una Raspberry Pi o un PC Linux y protege los dispositivos de toda la casa.</p></div>
+      <div class="rejilla tarjetas">
+        <article class="tarjeta"><svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-8 9 8v9H3zM9 20v-6h6v6"/></svg><h3>Toda la casa protegida</h3><p>Móviles, teles, consolas y ordenadores, sin instalar nada en cada aparato.</p></article>
+        <article class="tarjeta"><svg class="icono verde" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M5 8l7-5 7 5M5 16l7 5 7-5"/></svg><h3>DNS independiente</h3><p>Pi-hole v6 filtra y Unbound resuelve por su cuenta con DNSSEC, sin depender de Google ni del operador.</p></article>
+        <article class="tarjeta"><svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5M4 19h16M8 15l3-4 3 2 4-6"/></svg><h3>Lo puedes ver</h3><p>El panel de Pi-hole enseña consultas, bloqueos y estadísticas para entender qué ocurre.</p></article>
+        <article class="tarjeta"><svg class="icono verde" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M5 8l7-5 7 5M5 16l7 5 7-5"/></svg><h3>Gratis y autoalojado</h3><p>El código tiene licencia MIT y tus datos se quedan en tu propia máquina.</p></article>
+      </div>
+      <figure class="captura-panel"><img src="img/captura-panel-pihole.png" alt="Panel de Pi-hole de SHIELD-DNS con consultas, bloqueos y gráficas" width="1280" height="705" loading="lazy"><figcaption>Panel de Pi-hole con datos de demostración.</figcaption></figure>
+      <img class="ping derecha" src="img/ping/ping-hola.svg" alt="Ping: «¡Eh, mira! 1.284 anuncios atrapados hoy»" width="492" height="136" loading="lazy">
+    </section>
+
+    <section class="seccion banda" id="como-funciona" aria-labelledby="funciona-titulo"><div class="contenedor"><div class="encabezado"><p class="ceja">El viaje de una consulta</p><h2 id="funciona-titulo">Cómo funciona</h2><p>SHIELD-DNS decide qué consultas salen a Internet y cuáles se quedan en la puerta.</p></div>
+      <div class="diagrama" aria-label="Cualquier dispositivo consulta Pi-hole. Los anuncios se bloquean con 0.0.0.0 y los dominios permitidos pasan por Unbound con DNSSEC hacia Internet"><div class="nodo"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M10 5h4M10 18h4"/></svg><strong>Cualquier dispositivo</strong><small>móvil, tele o consola</small></div><span class="flecha" aria-hidden="true">→</span><div class="nodo destacado"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 20 6v5c0 5-3 8-8 10-5-2-8-5-8-10V6zM8 12l3 3 5-6"/></svg><strong>Pi-hole</strong><small>filtra el DNS</small></div><span class="flecha" aria-hidden="true">→</span><div class="salidas"><div class="nodo bloqueado"><strong>Anuncio o rastreador</strong><small>bloqueado · 0.0.0.0</small></div><div class="nodo permitido"><strong>Dominio permitido</strong><small>Unbound + DNSSEC → Internet</small></div></div></div>
+    </div></section>
+
+    <section class="seccion contenedor" id="instalar" aria-labelledby="instalar-titulo">
+      <div class="encabezado"><p class="ceja">Sin magia negra</p><h2 id="instalar-titulo">Instalar, paso a paso</h2><p>Los valores son ejemplos de una red ficticia: <code>192.168.1.50</code> es la máquina y <code>192.168.1.1</code> el router.</p></div>
+      <div class="pasos">
+        <article class="paso"><div class="numero">01</div><div><h3>Comprueba los requisitos</h3><p>Raspberry Pi 4/5 de 64 bits o PC Linux con Docker, puerto 53 libre e IP fija en casa. Ejemplo: <code>192.168.1.50</code>.</p></div></article>
+        <article class="paso"><div class="numero">02</div><div><h3>Prepara la máquina</h3><div class="comando"><pre><code>sudo apt update &amp;&amp; sudo apt install -y git openssl</code></pre><button class="copiar" type="button">Copiar</button></div></div></article>
+        <article class="paso"><div class="numero">03</div><div><h3>Clona e instala</h3><div class="comando"><pre><code>mkdir -p ~/homelab &amp;&amp; cd ~/homelab
+git clone https://github.com/BertMarti/SHIELD-DNS.git
+cd SHIELD-DNS
+./install.sh</code></pre><button class="copiar" type="button">Copiar</button></div></div></article>
+        <article class="paso"><div class="numero">04</div><div><h3>Abre el panel</h3><p>Visita <code>https://192.168.1.50:8443/admin</code>, acepta el aviso del certificado propio y consulta la contraseña con:</p><div class="comando"><pre><code>grep PIHOLE_PASSWORD .env</code></pre><button class="copiar" type="button">Copiar</button></div></div></article>
+        <article class="paso"><div class="numero">05</div><div><h3>Ponlo como DNS</h3><p>En el router, dentro de DHCP/LAN, usa <code>192.168.1.50</code> como DNS. No pongas un DNS secundario externo, porque permitiría saltarse el bloqueo. También puedes configurarlo en un dispositivo concreto.</p></div></article>
+        <article class="paso importante"><div class="numero">06</div><div><h3>Comprueba que funciona</h3><div class="comando"><pre><code>nslookup doubleclick.net 192.168.1.50
+nslookup example.com 192.168.1.50</code></pre><button class="copiar" type="button">Copiar</button></div><p>La primera consulta debe dar <code>0.0.0.0</code> y la segunda una IP normal. Nunca abras el puerto 53 ni el panel en el router.</p></div></article>
+      </div>
+      <div class="nota"><strong>¿Quieres instalar todo el ecosistema?</strong><div class="comando compacto"><pre><code>curl -fsSL https://raw.githubusercontent.com/BertMarti/ARIA/main/instalar-todo.sh | bash</code></pre><button class="copiar" type="button">Copiar</button></div></div><p class="estado" role="status" aria-live="polite"></p>
+      <img class="ping izquierda" src="img/ping/ping-instala.svg" alt="Ping: «¿Instalado? Desde ya, ni un anuncio se me escapa»" width="492" height="136" loading="lazy">
+    </section>
+
+    <section class="seccion banda suave" id="usar" aria-labelledby="usar-titulo"><div class="contenedor"><div class="encabezado"><p class="ceja">El día a día</p><h2 id="usar-titulo">Usar SHIELD-DNS</h2><p>El panel te permite observar y corregir el bloqueo sin tocar cada dispositivo.</p></div><div class="mini-grid"><article><h3>Ver lo que ocurre</h3><p>Abre <strong>Dashboard</strong> o <strong>Query Log</strong> para ver consultas y bloqueos.</p></article><article><h3>Permitir un dominio</h3><p>Si algo se rompe, busca su consulta en <strong>Query Log</strong> y elige permitir.</p></article><article><h3>Pausar un rato</h3><p>En el panel puedes desactivar el bloqueo indefinidamente, 10 segundos, 30 segundos, 5 minutos o un tiempo personalizado.</p></article><article><h3>Nombres locales</h3><p>El instalador prepara <code>aria.lan</code> para resolver nombres dentro de casa.</p></article></div><p class="aviso">El bloqueo por DNS no quita todos los anuncios: algunos anuncios de vídeo comparten dominio con el contenido. El DNS privado del móvil o un DNS IPv6 del operador también pueden saltárselo.</p></div></section>
+
+    <section class="seccion contenedor" id="aria" aria-labelledby="aria-titulo"><div class="encabezado"><p class="ceja">Todo en un mismo lugar</p><h2 id="aria-titulo">SHIELD-DNS con ARIA y HEIMDALL</h2><p>ARIA convierte el filtro en una pieza fácil de consultar y HEIMDALL lo lleva contigo fuera de casa.</p></div><div class="aria-layout"><div class="lista-aria"><h3>¿Qué añade ARIA?</h3><ul><li>Estadísticas en el Centro de control y pausas de 5, 30 o 60 minutos.</li><li>Preguntas en el chat como «¿cuántos anuncios has bloqueado hoy?» y <code>/bloqueo</code> en Telegram.</li><li>Resumen diario, informe semanal y aviso si SHIELD-DNS deja de responder.</li><li>Control parental por dispositivo con servicios y horarios.</li><li>Es bloqueo DNS: no puede parar un DNS fijado a mano, todo el DNS cifrado ni una VPN.</li></ul></div><figure><img src="img/captura-aria-shield.png" alt="Tarjeta de SHIELD-DNS en el Centro de control de ARIA" width="400" height="575" loading="lazy"><figcaption>Tarjeta de SHIELD-DNS en ARIA con datos de demostración.</figcaption></figure></div><div class="ecosistema-grid"><a class="eco-card aria-card" href="https://github.com/BertMarti/ARIA" rel="noopener noreferrer"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 15c2-5 6-5 8 0M9 9h.01M15 9h.01"/></svg><h3>ARIA</h3><p>Asistente y panel central.</p></a><a class="eco-card shield-card" href="index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 20 6v5c0 5-3 8-8 10-5-2-8-5-8-10V6zM8 12l3 3 5-6"/></svg><h3>SHIELD-DNS</h3><p>Pi-hole y Unbound para bloquear.</p></a><a class="eco-card heim-card" href="https://bertmarti.github.io/HEIMDALL/" rel="noopener noreferrer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10V7a5 5 0 0 1 10 0v3M5 10h14v11H5zM12 14v3"/></svg><h3>HEIMDALL</h3><p>VPN WireGuard para salir protegido.</p></a></div><img class="ping derecha" src="img/ping/ping-aria.svg" alt="Ping: «ARIA ya sabe quién llamó al DNS»" width="492" height="136" loading="lazy"></section>
+
+    <section class="seccion banda" id="preguntas" aria-labelledby="preguntas-titulo"><div class="contenedor"><div class="encabezado"><p class="ceja">Cuando algo no encaja</p><h2 id="preguntas-titulo">Preguntas frecuentes</h2></div><div class="faq"><details><summary>El puerto 53 está ocupado</summary><p>Comprueba qué servicio lo usa con <code>sudo ss -tulpn | grep 53</code> y detén el servicio que corresponda antes de ejecutar <code>./install.sh</code>.</p></details><details><summary>La casa se queda sin internet</summary><p>Revisa los contenedores y sus logs. Mientras lo arreglas, devuelve temporalmente al router el DNS anterior.</p></details><details><summary>No se bloquean anuncios</summary><p>Confirma que el dispositivo recibe <code>192.168.1.50</code>, desactiva DNS privado, revisa IPv6 y mira Query Log.</p></details><details><summary>Una web o aplicación deja de funcionar</summary><p>Busca el dominio en Query Log y permítelo desde el panel solo si confías en él.</p></details><details><summary>He olvidado la contraseña</summary><p>Está en el archivo <code>.env</code>. Consulta <code>grep PIHOLE_PASSWORD .env</code>.</p></details><details><summary>¿Funciona en Windows?</summary><p>No es recomendable: exponer DNS a toda la red suele dar problemas con Windows, WSL2 y Docker Desktop.</p></details><details><summary>¿Es gratis?</summary><p>Sí. Es autoalojado y tiene licencia MIT.</p></details><details><summary>¿Cómo hago copias de seguridad?</summary><p>Ejecuta <code>./backup.sh</code> y guarda la copia fuera de la máquina.</p></details></div><img class="ping derecha" src="img/ping/ping-problemas.svg" alt="Ping: «¡Alerta! Ese anuncio intentó colarse»" width="492" height="136" loading="lazy"></div></section>
+  </main>
+  <footer class="pie"><div class="contenedor"><strong><svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 20 6v5c0 5-3 8-8 10-5-2-8-5-8-10V6zM8 12l3 3 5-6"/></svg> SHIELD-DNS</strong><span>Licencia MIT</span><a href="https://github.com/BertMarti/SHIELD-DNS" rel="noopener noreferrer">Código en GitHub</a><span>Hecho para el ecosistema ARIA</span></div></footer>
+</body>
+</html>
