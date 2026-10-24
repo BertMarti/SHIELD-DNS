@@ -26,6 +26,7 @@
 <p align="center">
   <b><a href="#instalacion">🚀 Instalar</a></b>&nbsp;&nbsp;·&nbsp;&nbsp;
   <a href="#apuntarlo-como-dns">📡 Apuntarlo como DNS</a>&nbsp;&nbsp;·&nbsp;&nbsp;
+  <a href="#lo-que-tienes-que-hacer-tu">🙋 Lo que tienes que hacer tú</a>&nbsp;&nbsp;·&nbsp;&nbsp;
   <a href="#con-aria">🤖 Con ARIA</a>&nbsp;&nbsp;·&nbsp;&nbsp;
   <a href="#problemas-frecuentes">🆘 Problemas</a>
 </p>
@@ -74,6 +75,7 @@ Ping es el hada de luz de ARIA; en SHIELD-DNS **atrapa anuncios** antes de que e
 - [🧚 Ping](#ping)
 - [📋 Requisitos](#requisitos)
 - [🚀 Instalación](#instalacion)
+- [🙋 Lo que tienes que hacer tú](#lo-que-tienes-que-hacer-tu)
 - [⚙️ Configuración](#configuracion)
 - [📡 Apuntarlo como DNS](#apuntarlo-como-dns)
 - [🧭 Operación diaria](#operacion-diaria)
@@ -115,13 +117,18 @@ sudo apt update && sudo apt install -y git openssl
 mkdir -p ~/homelab && cd ~/homelab
 git clone https://github.com/BertMarti/SHIELD-DNS.git
 cd SHIELD-DNS
+./install.sh --comprobar
 ./install.sh
 ```
 
+`./install.sh --comprobar` solo revisa Docker, Docker Compose v2, la arquitectura compatible (amd64, arm64, armhf o armel) y que estén libres el puerto 53 TCP/UDP y los puertos del panel 8080/8443. No cambia nada: devuelve `0` si todo está listo y `1` si muestra un problema y su arreglo exacto.
+
+La primera vez, si no existe `.env` y estás en una terminal, el instalador hace dos preguntas: la contraseña del panel (Enter genera una segura de 24 caracteres y la muestra una sola vez en el resumen; si eliges una, debe tener al menos 12 caracteres y solo letras, números y `. _ - @ % + = , : ! * ^`) y si quieres añadir las listas recomendadas. La zona horaria se toma del sistema. Si `.env` ya existe no pregunta nada, como en `./update.sh`; sin terminal usa los valores por defecto y no imprime la contraseña.
+
 El instalador es idempotente y hace lo siguiente:
 
-1. Comprueba Docker, Compose y el puerto 53.
-2. Crea `.env` desde [`.env.example`](.env.example), genera la contraseña del panel y establece `aria.lan` con la IP detectada.
+1. Comprueba Docker, Docker Compose v2, la arquitectura y los puertos 53, 8080 y 8443.
+2. Crea `.env` con permisos `600` desde el primer momento, genera la contraseña si falta, toma la zona horaria del sistema y establece `aria.lan` con la IP detectada.
 3. Arranca `shield-unbound` y `shield-pihole`, y espera el estado saludable de Pi-hole.
 4. Registra y descarga las listas de `EXTRA_ADLISTS`.
 5. Comprueba que el DNS responde.
@@ -131,6 +138,17 @@ Panel: `https://192.168.1.50:8443/admin`. El certificado es autofirmado. La cont
 ```bash
 grep PIHOLE_PASSWORD .env
 ```
+
+<p align="right"><a href="#readme-top">⬆️ Volver arriba</a></p>
+
+<a id="lo-que-tienes-que-hacer-tu"></a>
+## 🙋 Lo que tienes que hacer tú
+
+- Cambia el DNS del router a la IP de la máquina, siguiendo los pasos de [Apuntarlo como DNS](#apuntarlo-como-dns).
+- Reserva una IP fija para la máquina, por ejemplo `192.168.1.50`.
+- Guarda la contraseña del panel cuando el instalador la muestre; la contraseña generada solo se enseña una vez.
+- En enero, revisa manualmente la versión 2027 de Pi-hole: Dependabot no propone esa actualización mayor.
+- (Avanzado) Decide si activar los límites de memoria: en Raspberry Pi OS viene desactivado (`cgroup_disable=memory`) y hay que añadir `cgroup_enable=memory` al final de la única línea de `/boot/firmware/cmdline.txt` y reiniciar.
 
 <p align="right"><a href="#readme-top">⬆️ Volver arriba</a></p>
 
@@ -276,13 +294,17 @@ Hace una copia, ejecuta `git pull --ff-only`, descarga imágenes nuevas y vuelve
 <details>
 <summary><b>El puerto 53 está ocupado</b></summary>
 
+Si lo ocupa `systemd-resolved` en `127.0.0.53` o `127.0.0.54`, aplica este arreglo exacto:
+
 ```bash
-sudo ss -tulpn | grep 53
-sudo systemctl disable --now systemd-resolved
-# o, si existía un Pi-hole nativo:
-sudo systemctl disable --now pihole-FTL
-./install.sh
+sudo mkdir -p /etc/systemd/resolved.conf.d
+printf '[Resolve]\nDNSStubListener=no\n' | sudo tee /etc/systemd/resolved.conf.d/shield-dns.conf
+sudo ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
+sudo systemctl restart systemd-resolved
+./install.sh --comprobar
 ```
+
+Si es otro servicio, localízalo con `sudo ss -tulpn | grep ':53 '`. Los habituales se paran con `sudo systemctl disable --now dnsmasq`, `sudo systemctl disable --now pihole-FTL` o `sudo systemctl disable --now named`. Si ya es SHIELD-DNS quien usa el puerto, no es un problema.
 </details>
 
 <details>

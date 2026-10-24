@@ -15,6 +15,7 @@ SHIELD-DNS es un bloqueador de anuncios, rastreadores y dominios maliciosos para
 
 ```bash
 ./install.sh
+./install.sh --comprobar
 ./update.sh
 ./backup.sh
 ./restore.sh backups/shield-dns-AAAAMMDD-HHMM.tar.gz
@@ -27,6 +28,7 @@ Validación local:
 ```bash
 bash -n *.sh site/*.sh
 shellcheck *.sh site/*.sh
+tests/instalador.sh
 cp .env.example /tmp/shield.env
 PIHOLE_PASSWORD=x docker compose --env-file /tmp/shield.env config -q
 gitleaks git . --redact
@@ -41,6 +43,8 @@ Pages publica solo `site/` y las imágenes necesarias, al subir a `main` o media
 - Bash con `set -euo pipefail`, scripts idempotentes y español de España.
 - Mantener la información útil: moverla, no borrarla.
 - No inventar comportamiento. Comprobar primero scripts y Compose.
+- No cambiar nombres de servicio o contenedor, puertos ni redes: los usa ARIA.
+- No subir versiones mayores de las imágenes sin revisar antes la compatibilidad con ARIA.
 
 ## Seguridad y producción
 

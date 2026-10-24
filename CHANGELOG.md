@@ -2,6 +2,13 @@
 
 Formato basado en Keep a Changelog. El proyecto no usa números de versión.
 
+## [2026-10-24] Fase 2
+
+- **Añadido:** comprobación previa `./install.sh --comprobar`, opciones `--sin-preguntas` y `--ayuda`, asistente de primera instalación, pruebas del instalador y sección «Empieza en 5 minutos» en la web.
+- **Cambiado:** imágenes fijadas a Pi-hole `2026.09.0` y Unbound `1.26.1` con sus digest desplegados; documentación del resumen de instalación, Dependabot y pendientes de memoria.
+- **Corregido:** creación de `.env` con permisos `600` desde el primer momento y guía exacta para liberar el puerto 53 ocupado por `systemd-resolved`.
+- **Seguridad:** `no-new-privileges:true` en Unbound, no en Pi-hole por sus capacidades requeridas; se documentan los límites de exposición del DNS y panel.
+
 ## [2026-10-24]
 
 - Añadida documentación técnica separada y guía para IA.

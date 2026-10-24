@@ -9,9 +9,9 @@
 
 ## Siguiente
 
-1. Fijar `pihole/pihole` y `klutchell/unbound` a versiones concretas, después de mirar qué versión corre en la Pi. No hacerlo antes: una versión anterior puede degradar la base de datos de Pi-hole.
+1. [x] Fijar `pihole/pihole` y `klutchell/unbound` a las versiones y digest desplegados.
 2. Probar límites de memoria en una Pi de pruebas.
-3. Tomar capturas nuevas de la web.
+3. Revisar manualmente en enero la versión 2027 de Pi-hole y su compatibilidad con ARIA.
 4. Valorar que el panel de ARIA entre solo por HTTPS 8443; hoy ARIA usa la API por HTTP 8080 en la LAN.
 
 ## Ideas
