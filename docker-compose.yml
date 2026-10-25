@@ -2,7 +2,7 @@ name: shield-dns
 
 services:
   unbound:
-    image: klutchell/unbound:1.26.1@sha256:9a3939ca33d6d3b42b81a70391bb8e43f0a08d2bd7a3fdffb43d427493345c36
+    image: klutchell/unbound:v1.26.2@sha256:50cbeb32b5838a829a7226b19cb151f9535bd7f9f3190f950780f452fe807478
     container_name: shield-unbound
     restart: unless-stopped
     # Probado en un compose aislado (24/10/2026): arranca sano y valida DNSSEC con esta opción.
@@ -19,7 +19,7 @@ services:
       start_period: 20s
 
   pihole:
-    image: pihole/pihole:2026.09.0@sha256:5b9c8cf51de7d6d3f2240dbe72baf5f06e1fd39cb4d77a99fab4fa13e23bd1be
+    image: pihole/pihole:2026.10.0@sha256:d34134716fc32038b052a8674c7c6879e0ff21f0e6d8af345166fffa2c27c113
     container_name: shield-pihole
     restart: unless-stopped
     # Sin no-new-privileges a propósito: con esa opción pihole-FTL pierde CAP_NET_BIND_SERVICE y
