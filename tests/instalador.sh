@@ -30,6 +30,7 @@ case "$1" in
   compose) [ "$2" = version ] && echo "Docker Compose version v2.40.0"; exit 0 ;;
   ps) for c in ${DOBLE_CONTENEDORES:-}; do echo "$c"; done; exit 0 ;;
   inspect) echo healthy ;;
+  exec) case "$*" in *"SELECT changes()"*) echo "${DOBLE_LISTAS_NUEVAS:-1}" ;; esac ;;
 esac
 exit 0'
   doble sudo 'echo "sudo $*" >> "$LOG"; [ "$1" = -n ] && shift; exec "$@"'
@@ -40,6 +41,8 @@ exit 0'
   doble timedatectl 'echo Europe/Madrid'
   doble curl 'echo "curl $*" >> "$LOG"; exit 1'
   doble sleep 'exit 0'
+  doble awk "[ -n \"\${DOBLE_AWK_FALLA:-}\" ] && [ -n \"\${CLAVE:-}\" ] && exit 2; exec $(command -v awk) \"\$@\""
+
 }
 
 # ejecutar [VAR=valor ...] -- [argumentos de install.sh]   (sin terminal: stdin vacío)
@@ -132,6 +135,17 @@ prueba "aria.lan apunta a la IP de la máquina" eval '[ "$(env_valor LOCAL_DNS_H
 preparar; printf 'UNCONN 0 0 127.0.0.53%%lo:53 0.0.0.0:*\n' > "$CASO/udp"
 ejecutar DOBLE_SS_UDP="$CASO/udp" -- --sin-preguntas
 prueba "instalación con el 53 ocupado: se detiene antes de crear .env" eval '[ $CODIGO -eq 1 ] && [ ! -e "$CASO/repo/.env" ] && ! log_tiene "compose up"'
+
+preparar; printf 'WEB_HTTP_PORT=08080\n' > "$CASO/repo/.env"; ejecutar -- --comprobar
+prueba "un puerto con cero a la izquierda (08080) no es válido" eval '[ $CODIGO -eq 1 ] && salida_tiene "WEB_HTTP_PORT=08080 no es un puerto válido"'
+
+preparar; ejecutar DOBLE_AWK_FALLA=1 -- --sin-preguntas
+prueba "si no se puede escribir .env: se para, lo explica y no deja temporales" \
+  eval '[ $CODIGO -eq 1 ] && salida_tiene "No pude escribir" && [ -z "$(ls -A "$CASO/repo" | grep -v "^\.env\.example$" | grep "^\.env\.")" ]'
+
+preparar; ejecutar DOBLE_LISTAS_NUEVAS=0 -- --sin-preguntas
+prueba "si las listas ya estaban registradas no relanza gravity (update.sh no carga la Pi)" \
+  eval '[ $CODIGO -eq 0 ] && ! log_tiene "pihole -g" && salida_tiene "ya registradas"'
 
 # --- Ruta de ./update.sh: .env ya existe ---
 preparar; cp "$CASO/repo/.env.example" "$CASO/repo/.env"

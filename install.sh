@@ -48,9 +48,12 @@ leer_env() {
 # Escribe CLAVE=VALOR en .env (sustituye la línea o la añade). Con awk: el valor no se interpreta.
 poner_env() {
   local tmp; tmp="$(mktemp .env.XXXXXX)"
-  CLAVE="$1" VALOR="$2" awk 'BEGIN{c=ENVIRON["CLAVE"]; v=ENVIRON["VALOR"]; hecho=0}
-    index($0, c "=")==1 {print c "=" v; hecho=1; next} {print}
-    END{if(!hecho) print c "=" v}' .env > "$tmp"
+  trap 'rm -f "${tmp:-}"; trap - RETURN' RETURN
+  if ! CLAVE="$1" VALOR="$2" awk 'BEGIN{c=ENVIRON["CLAVE"]; v=ENVIRON["VALOR"]; hecho=0}
+      index($0, c "=")==1 {print c "=" v; hecho=1; next} {print}
+      END{if(!hecho) print c "=" v}' .env > "$tmp"; then
+    rm -f "$tmp"; fallo "No pude escribir $1 en .env (¿disco lleno o sin permiso?). .env no se ha tocado."
+  fi
   chmod 600 "$tmp"; mv "$tmp" .env
 }
 
@@ -62,6 +65,9 @@ zona_horaria() {
   [ -n "$tz" ] || tz="$(cat /etc/timezone 2>/dev/null || true)"
   printf '%s' "${tz:-Europe/Madrid}"
 }
+
+# Sin ceros a la izquierda (08080 no es un puerto válido para Docker).
+puerto_valido() { [[ "$1" =~ ^[1-9][0-9]{0,4}$ ]] && [ "$1" -le 65535 ]; }
 
 # Puerto alternativo para sugerir (el siguiente, o el anterior si ya es el último).
 otro_puerto() { if [ "$1" -lt 65535 ]; then echo $(($1 + 1)); else echo $(($1 - 1)); fi; }
@@ -154,7 +160,7 @@ comprobar_puertos() {
   for var in WEB_HTTP_PORT:8080 WEB_HTTPS_PORT:8443; do
     def="${var#*:}"; var="${var%%:*}"
     p="$(leer_env "$var")"; p="${p:-$def}"
-    if [[ ! "$p" =~ ^[0-9]+$ ]] || [ "$p" -lt 1 ] || [ "$p" -gt 65535 ]; then
+    if ! puerto_valido "$p"; then
       problema "$var=$p no es un puerto válido." "Pon un número entre 1 y 65535 en .env (por defecto, $def)."
     elif [ -n "$(escuchando tcp "$p")" ]; then
       problema "El puerto $p/tcp (panel web) está ocupado." \
@@ -261,13 +267,21 @@ ok "Pi-hole funcionando"
 
 # --- 4. Listas de bloqueo extra -------------------------------------------------------------------------
 if [ -n "${EXTRA_ADLISTS:-}" ]; then
+  nuevas=0
   for url in $EXTRA_ADLISTS; do
-    $DOCKER exec shield-pihole pihole-FTL sqlite3 /etc/pihole/gravity.db \
-      "INSERT OR IGNORE INTO adlist (address, enabled, comment) VALUES ('${url//\'/}', 1, 'SHIELD-DNS');"
+    n="$($DOCKER exec shield-pihole pihole-FTL sqlite3 /etc/pihole/gravity.db \
+      "INSERT OR IGNORE INTO adlist (address, enabled, comment) VALUES ('${url//\'/}', 1, 'SHIELD-DNS'); SELECT changes();" | tail -n1 | tr -dc '0-9')"
+    nuevas=$((nuevas + ${n:-0}))
   done
-  info "Actualizando listas de bloqueo (puede tardar un par de minutos)..."
-  $DOCKER exec shield-pihole pihole -g >/dev/null
-  ok "Listas actualizadas"
+  # gravity solo si se ha añadido alguna lista: así ./update.sh no carga la Pi cada vez
+  # (Pi-hole ya actualiza sus listas solo una vez por semana).
+  if [ "$nuevas" -gt 0 ]; then
+    info "Descargando $nuevas lista(s) de bloqueo nueva(s) (puede tardar un par de minutos)..."
+    $DOCKER exec shield-pihole pihole -g >/dev/null
+    ok "Listas actualizadas"
+  else
+    ok "Listas de bloqueo ya registradas (Pi-hole las actualiza solo cada semana)"
+  fi
 fi
 
 # --- 5. Comprobación -------------------------------------------------------------------------------------

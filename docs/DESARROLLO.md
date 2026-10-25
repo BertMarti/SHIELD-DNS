@@ -52,7 +52,7 @@ Pi-hole v6 usa `POST /api/auth` con JSON. No documentar autenticación básica. 
 
 ## Scripts
 
-`install.sh` acepta `--comprobar` (solo comprueba requisitos y puertos), `--sin-preguntas` y `--ayuda`. Sin `.env`, en una terminal ofrece dos preguntas; con `.env` no pregunta. Crea `.env` con permisos `600`, genera una contraseña si hace falta, detecta la IP para `aria.lan`, crea `data/pihole`, arranca los contenedores, espera el estado saludable, registra `EXTRA_ADLISTS`, reconstruye gravity y prueba una consulta. `backup.sh` crea una copia Teleporter, incluye `.env`, usa permisos `600` y conserva siete copias. `restore.sh` pide confirmación, restaura `.env`, instala y carga Teleporter. `uninstall.sh` conserva datos por defecto y los purga solo con `--purge`.
+`install.sh` acepta `--comprobar` (solo comprueba requisitos y puertos), `--sin-preguntas` y `--ayuda`. Sin `.env`, en una terminal ofrece dos preguntas; con `.env` no pregunta. Crea `.env` con permisos `600`, genera una contraseña si hace falta, detecta la IP para `aria.lan`, crea `data/pihole`, arranca los contenedores, espera el estado saludable, registra `EXTRA_ADLISTS`, reconstruye gravity solo si se ha añadido alguna lista nueva (Pi-hole ya las actualiza cada semana) y prueba una consulta. `backup.sh` crea una copia Teleporter, incluye `.env`, usa permisos `600` y conserva siete copias. `restore.sh` pide confirmación, restaura `.env`, instala y carga Teleporter. `uninstall.sh` conserva datos por defecto y los purga solo con `--purge`.
 
 ## Versiones fijadas
 
@@ -131,7 +131,7 @@ docker compose --env-file /tmp/shield.env config -q
 gitleaks git . --redact
 site/construir.sh /tmp/shield-web/SHIELD-DNS && python3 -m http.server 8000 -d /tmp/shield-web   # http://localhost:8000/SHIELD-DNS/
 ```
-`tests/instalador.sh` contiene 29 pruebas del instalador con dobles de Docker, sudo, ss, curl, ip y otros comandos; copia el instalador a una carpeta temporal y no toca Docker real, la red ni puertos. Usa `script` (util-linux) para probar la ejecución con terminal. CI ejecuta esas pruebas en el job «Scripts», junto a `bash -n` y ShellCheck de `tests/*.sh`; también verifica que solo se publican 53, 8080 y 8443, revisa la web y analiza el historial con gitleaks. `contents: read` limita permisos. Dependabot agrupa semanalmente actualizaciones de imágenes Docker y Actions.
+`tests/instalador.sh` contiene 32 pruebas del instalador con dobles de Docker, sudo, ss, curl, ip y otros comandos; copia el instalador a una carpeta temporal y no toca Docker real, la red ni puertos. Usa `script` (util-linux) para probar la ejecución con terminal. CI ejecuta esas pruebas en el job «Scripts», junto a `bash -n` y ShellCheck de `tests/*.sh`; también verifica que solo se publican 53, 8080 y 8443, revisa la web y analiza el historial con gitleaks. `contents: read` limita permisos. Dependabot agrupa semanalmente actualizaciones de imágenes Docker y Actions.
 
 Pages construye con `site/construir.sh _site`, copia `site/` y `docs/img` a `_site/img`, y publica `https://bertmarti.github.io/SHIELD-DNS/`. No publica la documentación como sitio independiente.
 

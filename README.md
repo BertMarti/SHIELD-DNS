@@ -130,7 +130,7 @@ El instalador es idempotente y hace lo siguiente:
 1. Comprueba Docker, Docker Compose v2, la arquitectura y los puertos 53, 8080 y 8443.
 2. Crea `.env` con permisos `600` desde el primer momento, genera la contraseña si falta, toma la zona horaria del sistema y establece `aria.lan` con la IP detectada.
 3. Arranca `shield-unbound` y `shield-pihole`, y espera el estado saludable de Pi-hole.
-4. Registra y descarga las listas de `EXTRA_ADLISTS`.
+4. Registra las listas de `EXTRA_ADLISTS` y solo las descarga si hay alguna nueva.
 5. Comprueba que el DNS responde.
 
 Panel: `https://192.168.1.50:8443/admin`. El certificado es autofirmado. La contraseña está en `.env`:
@@ -144,6 +144,7 @@ grep PIHOLE_PASSWORD .env
 <a id="lo-que-tienes-que-hacer-tu"></a>
 ## 🙋 Lo que tienes que hacer tú
 
+- **Tras esta actualización (fase 2):** ejecuta `./update.sh` en un momento tranquilo. No descarga imágenes nuevas, pero recrea los contenedores una vez y la casa se queda sin DNS unos segundos. Después comprueba que todo está en marcha con `docker compose ps` y que bloquea con `nslookup doubleclick.net 192.168.1.50` (pon la IP de tu Raspberry): debe responder `0.0.0.0`.
 - Cambia el DNS del router a la IP de la máquina, siguiendo los pasos de [Apuntarlo como DNS](#apuntarlo-como-dns).
 - Reserva una IP fija para la máquina, por ejemplo `192.168.1.50`.
 - Guarda la contraseña del panel cuando el instalador la muestre; la contraseña generada solo se enseña una vez.
