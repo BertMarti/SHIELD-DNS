@@ -20,7 +20,7 @@ La red privada evita que los contenedores usen el DNS del host y previene bucles
 
 ### Seguridad y panel
 
-- El instalador genera una contraseña aleatoria de 20 caracteres y la guarda en `.env` con permisos `600`.
+- El instalador genera una contraseña aleatoria de 24 caracteres y la guarda en `.env` con permisos `600`; en la primera instalación interactiva solo la muestra una vez.
 - Pi-hole usa certificado autofirmado; el aviso del navegador es esperado en la red doméstica.
 - La API de Pi-hole v6 usa `POST /api/auth` con JSON, no autenticación básica.
 - El panel publica 8080 y 8443; ARIA usa hoy HTTP 8080 en la LAN.
@@ -99,14 +99,22 @@ Ambas ejecuciones terminaron correctamente; la segunda no cambió nada innecesar
 - El certificado autofirmado es local; el acceso externo debe pasar por ARIA/HEIMDALL.
 - La lista de permitidos de gitleaks contiene solo un marcador histórico de contraseña de ejemplo y se mantiene por ser un falso positivo revisado del historial. No debe aparecer en documentación ni en ejemplos nuevos.
 
+## 24/10/2026 – fase 2
+
+- Se fijaron exactamente las imágenes desplegadas: Pi-hole `2026.09.0` y Unbound `1.26.1`, ambas con digest en `docker-compose.yml`.
+- Se activó `no-new-privileges:true` en Unbound. Se probó en un Compose aislado: arranca sano, resuelve y valida DNSSEC (`dnssec-failed.org` devuelve `SERVFAIL`). No se activa en Pi-hole porque `pihole-FTL` pierde `CAP_NET_BIND_SERVICE` y `CAP_NET_RAW` y el panel muestra avisos.
+- Los límites de memoria quedan pendientes: Raspberry Pi OS arranca con `cgroup_disable=memory`; activarlos requiere `cgroup_enable=memory` en `/boot/firmware/cmdline.txt` y reiniciar. Es una decisión de Alberto.
+- El primer `./update.sh` tras fusionar recreará una vez `shield-unbound` y `shield-pihole` aunque no descargue imágenes nuevas; habrá unos segundos sin DNS mientras Pi-hole arranca.
+- Dependabot ignora versiones mayores porque ARIA usa la API v6 de Pi-hole. Como Pi-hole usa el año como versión, `2027.x` debe revisarse manualmente en enero.
+- El instalador incorpora comprobación previa, asistente interactivo y resumen final con los pasos de configuración.
+
 ## 24/10/2026 – mejoras
 
 - CI valida Bash, ShellCheck, Compose, puertos publicados, privacidad de la web e historial con gitleaks; usa permisos mínimos `contents: read`.
 - Pages publica solo la web construida desde `site/` en `https://bertmarti.github.io/SHIELD-DNS/`.
 - Dependabot agrupa semanalmente imágenes Docker y GitHub Actions.
 - Se corrigió la documentación del DHCP: la red puente no recibe peticiones DHCP de la LAN.
-- `pihole/pihole:latest` y `klutchell/unbound:latest` siguen pendientes de fijar. Antes hay que mirar la versión que corre en la Pi para no bajar la versión de la base de datos de Pi-hole.
-- Queda pendiente valorar límites de memoria en una Pi de pruebas y pasar el panel de ARIA a HTTPS.
+- Queda pendiente valorar límites de memoria y pasar el panel de ARIA a HTTPS 8443.
 
 ## Roadmap
 
