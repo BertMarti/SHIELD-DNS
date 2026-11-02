@@ -1,6 +1,18 @@
 # Changelog
 
-Formato basado en Keep a Changelog. El proyecto no usa números de versión.
+Formato basado en Keep a Changelog. Desde la 1.0.0 usa versiones semánticas.
+
+## [1.0.0] - 2026-11-02
+
+Primera versión estable: lo que corre en la Raspberry de casa desde octubre de 2026.
+
+### Incluye
+- Bloqueador de anuncios y rastreadores para toda la casa con **Pi-hole v6** y **Unbound** (resolución propia con DNSSEC).
+- Lista anti-malware y phishing por defecto, y nombre local para entrar en ARIA desde la red y la VPN.
+- Instalador guiado (`install.sh`, con `--comprobar`, `--sin-preguntas` y `--ayuda`), `update.sh`, `backup.sh`, `restore.sh` y `uninstall.sh`.
+- Imágenes fijadas por versión y digest; `no-new-privileges` en Unbound; `.env` con permisos `600`.
+- Integración con ARIA: estadísticas, pausar el bloqueo, control parental por DNS y avisos si se cae.
+- CI (ShellCheck, `docker compose config`, puertos publicados, gitleaks), Dependabot y web en GitHub Pages.
 
 ## [2026-10-24] Fase 2
 
